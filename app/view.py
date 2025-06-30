@@ -3,8 +3,16 @@ from flask import render_template
 
 @app.route('/')
 def homepage():
-    return render_template('index.html')
+    usuario = 'Maria'
+    idade = 16
 
-@app.route('/nova')
+    context = {
+        'usuario':usuario,
+        'idade':idade
+    }
+    
+    return render_template('index.html', context=context)
+
+@app.route('/contato')
 def novapagina():
     return 'Outras views'
