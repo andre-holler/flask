@@ -44,6 +44,7 @@
                                         {% endif %}
 
                                     </td>
+                                    <td><a href="{{url_for('contatoDetail', id=dado.id)}}"><img src="{{url_for('static', filename='img/user.png')}}" style="width: 20px"></a></td>
                                 </tr>
                             {% endfor %}
 
