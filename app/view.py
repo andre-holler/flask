@@ -70,3 +70,7 @@ def contatoLista():
 def contatoDetail(id):
     obj=Contato.query.get(id)
     return render_template('contato_detail.html', obj=obj)
+
+@app.roue('/cadastro')
+def cadastro():
+    return render_template('cadastro.html')

@@ -1,9 +1,35 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired, Email
+from wtforms import StringField, SubmitField, PasswordField
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from flask_bcrypt import bcrypt
 
 from app import db
-from app.models import Contato
+from app.models import Contato, User
+
+class UserForm(FlaskForm):
+    nome = StringField('Nome', validators=[DataRequired()])
+    sobrenome = StringField('Sobrenome', validators=[DataRequired()])
+    email = StringField('E-Mail', validators=[DataRequired(), Email()])
+    senha = PasswordField('Senha', validators=[DataRequired()])
+    confirmacao_senha = PasswordField('Senha', validators=[DataRequired(), EqualTo('senha')])
+
+    def validate_email(self, email):
+        if User.query.filter(email=email.data).first():
+            return ValidationError('Usuário já cadastro com esse E-Mail')
+        
+    def save(self):
+        senha = bcrypt.generate_password_hash(self.senha.data.encode('utf-8'))
+
+        user = User(
+            nome = self.nome.data,
+            sobrenome = self.sobrenome.data,
+            email = self.email.data,
+            senha = senha
+        )
+
+        db.session.add(user)
+        db.session.commit()
+        return user
 
 
 class ContatoForm(FlaskForm):
