@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from app import db, bcrypt
-from app.models import Contato, User, Post
+from app.models import Contato, User, Post, PostComentarios
 
 class UserForm(FlaskForm):
     nome = StringField('Nome', validators=[DataRequired()])
@@ -83,4 +83,18 @@ class PostForm(FlaskForm):
         )
 
         db.session.add(post)
+        db.session.commit()
+
+class PostComentariosForm(FlaskForm):
+    mensagem = StringField('Mensagem', validators=[DataRequired()])
+    btnSubmit = SubmitField('Enviar')
+
+    def save(self, id_user, id_post):
+        comentario = PostComentarios(
+            mensagem = self.mensagem.data,
+            user_id = id_user
+            post_id = id_post
+        )
+
+        db.session.add(comentario)
         db.session.commit()
