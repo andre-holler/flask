@@ -1,8 +1,8 @@
 from app import app, db
 from flask import render_template, url_for, request, redirect
-from app.forms import ContatoForm, UserForm, LoginForm
+from app.forms import ContatoForm, UserForm, LoginForm, PostForm
 from app.models import Contato, User, Post
-from flask_login import login_user, logout_user, current_user, PostForm
+from flask_login import login_user, logout_user, current_user
 
 @app.route('/', methods=['GET', 'POST'])
 def homepage():
@@ -82,6 +82,6 @@ def PostNovo():
 
 
 @app.route('/post/lista')
-def PostLita():
+def PostLista():
     posts = Post.query.all()
     return render_template('post_lista.html', posts=posts)
