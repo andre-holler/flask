@@ -1,8 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, FileField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
-from app import db, bcrypt
+from app import db, bcrypt, app
 from app.models import Contato, User, Post, PostComentarios
+
+import os
+from werkzeug.utils import secure_filename
 
 class UserForm(FlaskForm):
     nome = StringField('Nome', validators=[DataRequired()])
@@ -53,12 +56,12 @@ class ContatoForm(FlaskForm):
         db.session.commit()
 
 class LoginForm(FlaskForm):
-    nome_usuario = StringField('Nome de Usuário', validators=[DataRequired()])
+    nome = StringField('Nome de Usuário', validators=[DataRequired()])
     senha = PasswordField('Senha', validators=[DataRequired()])
     btnSubmit = SubmitField('Login')
 
     def login(self):
-        user = User.query.filter_by(nome_usuario=self.nome_usuario.data).first()
+        user = User.query.filter_by(nome=self.nome.data).first()
 
         if user:
             if bcrypt.check_password_hash(user.senha, self.senha.data.encode('utf-8')):
@@ -71,28 +74,40 @@ class LoginForm(FlaskForm):
             raise Exception('Usuário não encontrado')
         
 class PostForm(FlaskForm):
-    titulo = StringField('Titulo', validators=[DataRequired()])
     mensagem = StringField('Mensagem', validators=[DataRequired()])
+    imagem = FileField('Imagem', validators=[DataRequired()])
     btnSubmit = SubmitField('Enviar')
 
     def save(self, user_id):
-        post = Post(
-            titulo = self.titulo.data,
-            mensagem = self.mensagem.data,
-            user_id = user_id
-        )
+        imagem = self.imagem.data
+        nome_seguro = secure_filename(imagem.filename)
 
+        post = Post(
+            mensagem = self.mensagem.data,
+            user_id = user_id,
+            imagem = nome_seguro
+        )
+        caminho = os.path.join(
+            #pegar as pastas que já está no projeto
+            os.path.abspath(os.path.dirname(__file__)),
+            #definir a pasta que configuramos para UPLOAD
+            app.config['UPLOAD_FILES'], 
+            'post',
+            nome_seguro
+        )
+        os.makedirs(os.path.dirname(caminho), exist_ok=True)
+        imagem.save(caminho)
         db.session.add(post)
         db.session.commit()
 
 class PostComentariosForm(FlaskForm):
-    mensagem = StringField('Mensagem', validators=[DataRequired()])
+    comentario = StringField('Comentário', validators=[DataRequired()])
     btnSubmit = SubmitField('Enviar')
 
     def save(self, id_user, id_post):
         comentario = PostComentarios(
-            mensagem = self.mensagem.data,
-            user_id = id_user
+            comentario = self.comentario.data,
+            user_id = id_user,
             post_id = id_post
         )
 

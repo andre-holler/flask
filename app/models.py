@@ -15,6 +15,7 @@ class User(db.Model, UserMixin):
     senha = db.Column(db.String, nullable=True)
     
     posts = db.relationship('Post', backref='user', lazy=True)
+    comentarios = db.relationship('PostComentarios', back_populates='user')
 
 
 class Contato(db.Model):
@@ -31,15 +32,18 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data_criacao = db.Column(db.DateTime, default=datetime.now)
     mensagem = db.Column(db.String, nullable=True)
+    imagem = db.Column(db.String, nullable=True, default='default.png')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     comentarios = db.relationship('PostComentarios', backref='post', lazy=True)
 
     def msg_resumo(self):
         return f"{self.mensagem[:10]}"
     
-class PostComentarios(db.model):
+class PostComentarios(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data_criacao = db.Column(db.DateTime, default=datetime.now())
     comentario = db.Column(db.String, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
+
+    user = db.relationship('User', back_populates='comentarios')
