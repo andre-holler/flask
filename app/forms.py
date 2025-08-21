@@ -56,12 +56,12 @@ class ContatoForm(FlaskForm):
         db.session.commit()
 
 class LoginForm(FlaskForm):
-    nome = StringField('Nome de Usuário', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
     senha = PasswordField('Senha', validators=[DataRequired()])
     btnSubmit = SubmitField('Login')
 
     def login(self):
-        user = User.query.filter_by(nome=self.nome.data).first()
+        user = User.query.filter_by(email=self.email.data).first()
 
         if user:
             if bcrypt.check_password_hash(user.senha, self.senha.data.encode('utf-8')):
